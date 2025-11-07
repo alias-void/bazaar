@@ -1,0 +1,18 @@
+name: Bazaar
+main: alias\bazaar\Bazaar
+version: 1.0.0
+api: 5.0.0
+author: alias-void
+description: A plugin to integrate player ran market in pocketmine server.
+
+commands:
+  bazaar:
+    description: Open player ran market menu
+    permission: "bazaar.menu"
+    aliases:
+      - market
+
+permissions:
+  bazaar.menu:
+    description: "Permission to open player ran market menu"
+    default: true

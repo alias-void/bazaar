@@ -1,0 +1,187 @@
+config-version: 1
+
+economy: "Bedrock-Economy"
+
+# Categories for the main bazaar menu.
+# Use lowercase vanilla item/block names with spaces replaced by underscores.
+categories:
+  Farming:
+    icon: "wheat"
+    items:
+      - "wheat"
+      - "carrot"
+      - "potato"
+      - "beetroot"
+      - "sweet_berries"
+      - "glow_berries"
+      - "pumpkin"
+      - "melon"
+      - "cactus"
+      - "sugarcane"
+      - "brown_mushroom"
+      - "red_mushroom"
+      - "nether_wart"
+      - "cocoa_beans"
+      - "wheat_seeds"
+      - "pumpkin_seeds"
+      - "melon_seeds"
+      - "beetroot_seeds"
+  Mining:
+    icon: "iron_pickaxe"
+    items:
+      - "cobblestone"
+      - "cobbled_deepslate"
+      - "gravel"
+      - "sand"
+      - "coal"
+      - "iron_ingot"
+      - "gold_ingot"
+      - "diamond"
+      - "lapis_lazuli"
+      - "redstone_dust"
+      - "emerald"
+      - "nether_quartz"
+      - "amethyst_shard"
+      - "copper_ingot"
+      - "raw_iron"
+      - "raw_gold"
+      - "raw_copper"
+      - "ancient_debris"
+      - "netherite_scrap"
+      - "netherite_ingot"
+  Mob_Drops:
+    icon: "bone"
+    items:
+      - "rotten_flesh"
+      - "bone"
+      - "string"
+      - "spider_eye"
+      - "gunpowder"
+      - "ender_pearl"
+      - "blaze_rod"
+      - "ghast_tear"
+      - "slimeball"
+      - "magma_cream"
+      - "phantom_membrane"
+      - "leather"
+      - "feather"
+      - "raw_porkchop"
+      - "raw_beef"
+      - "raw_chicken"
+      - "raw_mutton"
+      - "raw_rabbit"
+  Blocks:
+    icon: "grass"
+    items:
+      - "oak_log"
+      - "spruce_log"
+      - "birch_log"
+      - "jungle_log"
+      - "acacia_log"
+      - "dark_oak_log"
+      - "stone"
+      - "dirt"
+      - "glass"
+      - "sandstone"
+      - "wool"
+      - "hardened_clay"
+      - "obsidian"
+  Miscellaneous:
+    icon: "lava_bucket"
+    items:
+      - "stick"
+      - "flint"
+      - "bucket"
+      - "egg"
+      - "paper"
+      - "book"
+      - "name_tag"
+
+# Base prices for items when no specific price is set.
+# Use lowercase vanilla item names with spaces replaced by underscores (e.g., "iron_ingot", "raw_beef").
+base-prices:
+  # Farming
+  wheat: 2
+  carrot: 2
+  potato: 2
+  beetroot: 2
+  sweet_berries: 3
+  glow_berries: 5
+  pumpkin: 4
+  melon: 4
+  cactus: 3
+  sugarcane: 3
+  brown_mushroom: 5
+  red_mushroom: 5
+  nether_wart: 10
+  cocoa_beans: 8
+  wheat_seeds: 1
+  pumpkin_seeds: 1
+  melon_seeds: 1
+  beetroot_seeds: 1
+
+  # Mining
+  cobblestone: 1
+  cobbled_deepslate: 2
+  gravel: 1
+  sand: 1
+  coal: 5
+  iron_ingot: 10
+  gold_ingot: 20
+  diamond: 100
+  lapis_lazuli: 15
+  redstone_dust: 8
+  emerald: 50
+  nether_quartz: 12
+  amethyst_shard: 40
+  copper_ingot: 7
+  raw_iron: 5
+  raw_gold: 10
+  raw_copper: 3
+  ancient_debris: 1000
+  netherite_scrap: 2500
+  netherite_ingot: 12000
+
+  # Mob Drops
+  rotten_flesh: 2
+  bone: 3
+  string: 4
+  spider_eye: 5
+  gunpowder: 8
+  ender_pearl: 25
+  blaze_rod: 30
+  ghast_tear: 150
+  slimeball: 10
+  magma_cream: 12
+  phantom_membrane: 50
+  leather: 5
+  feather: 3
+  raw_porkchop: 4
+  raw_beef: 4
+  raw_chicken: 4
+  raw_mutton: 4
+  raw_rabbit: 4
+
+  # Blocks
+  oak_log: 4
+  spruce_log: 4
+  birch_log: 4
+  jungle_log: 4
+  acacia_log: 4
+  dark_oak_log: 4
+  stone: 1
+  dirt: 1
+  glass: 2
+  sandstone: 2
+  wool: 3
+  hardened_clay: 2
+  obsidian: 20
+
+  # Miscellaneous
+  stick: 1
+  flint: 2
+  bucket: 15
+  egg: 3
+  paper: 2
+  book: 6
+  name_tag: 200
