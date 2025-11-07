@@ -73,6 +73,7 @@ class ProductView
         $lore = ["§7Top Buy Orders:"];
         foreach ($topBuyOrders as $order) {
             [$price, $amt, $playerUUID] = $order;
+            if($price == -1) $price = $api->getBasicPrice($item);
             $lore[] = "§b{$amt}x §e{$item->getVanillaName()} §7@ §a{$price} coins";
         }
         $sellOfferButton->setLore($lore);
@@ -162,7 +163,15 @@ class ProductView
                     ProductView::Inventory($this->data["product"], $mainMenu->getInventory(), $player, $mainMenu);
                     return;
                 }
-                $amount = max(1, (int)$response[0]);
+
+                if(!is_numeric($response[0])){
+                    $player->sendMessage("§cPlease enter a valid number for the amount.");
+                    $mainMenu->display();
+                    ProductView::Inventory($this->data["product"], $mainMenu->getInventory(), $player, $mainMenu);
+                    return;
+                }
+
+                $amount = max(1, (int)$response[0]); // Ensure amount is at least 1
                 ProductView::$playerData[$player->getName()]["amount"] = $amount;
                 $player->sendMessage("§bAmount set to §e{$amount}");
 
@@ -196,15 +205,30 @@ class ProductView
                 ];
             }
             public function handleResponse(Player $player, $response): void {
-                if ($response === null) { $this->data["mainMenu"]->display(); return; }
-                $price = (float)$response[0];
+                if ($response === null) {
+                    $this->data["mainMenu"]->display();
+                    ProductView::Inventory($this->data["product"], $this->data["mainMenu"]->getInventory(), $player, $this->data["mainMenu"]);
+                    return;
+                }
+
+                if(!is_numeric($response[0])){
+                    $player->sendMessage("§cPlease enter a valid number for the price.");
+                    $this->data["mainMenu"]->display();
+                    ProductView::Inventory($this->data["product"], $this->data["mainMenu"]->getInventory(), $player, $this->data["mainMenu"]);
+                    return;
+                }
+
+                $price = (int)$response[0];
+                if ($price < 1) {
+                    $player->sendMessage("§cThe price must be at least 1 coin.");
+                }
                 ProductView::handleCreateOrder($player, $this->data, $this->isBuy, $price);
             }
         };
         $player->sendForm($form);
     }
 
-    public static function handleCreateOrder(Player $player, array &$data, bool $isBuy, float $price): void {
+    public static function handleCreateOrder(Player $player, array &$data, bool $isBuy, int $price): void {
         $product = clone $data["product"];
         $amount = (int)$data["amount"];
         $mainMenu = $data["mainMenu"];
@@ -220,7 +244,7 @@ class ProductView
         $product->setCount($amount);
 
         if ($isBuy) {
-            $api->createBuyOrder($player, $product, $amount, (int)$price);
+            $api->createBuyOrder($player, $product, $amount, $price);
             $player->sendMessage($price === -1
                 ? "§a[Instant Buy] §f{$amount}x §e{$product->getVanillaName()}§f purchased at best price!"
                 : "§a[Buy Order] §f{$amount}x §e{$product->getVanillaName()}§f at §b{$price} coins each!");
@@ -240,7 +264,7 @@ class ProductView
             // ✅ Remove items from inventory
             $player->getInventory()->removeItem($product);
 
-            $api->createSellOffer($player, $product, $amount, (int)$price);
+            $api->createSellOffer($player, $product, $amount, $price);
             $player->sendMessage($price === -1
                 ? "§c[Instant Sell] §f{$amount}x §e{$product->getVanillaName()}§f sold at best price!"
                 : "§c[Sell Offer] §f{$amount}x §e{$product->getVanillaName()}§f at §b{$price} coins each!");

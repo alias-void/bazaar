@@ -293,66 +293,74 @@ class BazaarAPI {
         return array_slice($orders, 0, $limit);
     }
 
-    private function processOrderWithBalance(BazaarObject $order, int $balance): void {
-        $orderItem = $order->getItem();
-        $orderPrice = $order->getPrice();
-        $orderUUID = $order->getUUID();
+    private function updateSellOffers(BazaarObject $order): void {
+        Await::f2c(function () use ($order) {
+            /** @var int $balance */
+            $balance = yield from Await::promise(fn($resolve) => self::checkBalance($order, $resolve));
 
-        foreach ($this->listings as $uuid => $playerListings) {
-            if ($orderUUID === $uuid) continue;
+            $orderItem = $order->getItem();
+            $orderPrice = $order->getPrice();
+            $orderUUID = $order->getUUID();
 
-            foreach ($playerListings as $product) {
-                $productItem = $product->getItem();
-                $productPrice = $product->getPrice();
-                $productUUID = $product->getUUID();
-                $productType = $product->getType();
-                $productAmount = $product->getCurrentAmount();
-                $orderAmount = $order->getCurrentAmount();
+            foreach ($this->listings as $uuid => $playerListings) {
+                if ($orderUUID === $uuid) continue;
 
-                if ($orderAmount <= 0) return; // Order is already filled
+                foreach ($playerListings as $product) {
+                    $productItem = $product->getItem();
+                    $productPrice = $product->getPrice();
+                    $productUUID = $product->getUUID();
+                    $productType = $product->getType();
+                    $productAmount = $product->getCurrentAmount();
+                    $orderAmount = $order->getCurrentAmount();
 
-                if (!$orderItem->equals($productItem, false, false) || $productType !== self::SELL_OFFER) continue;
+                    if ($orderAmount <= 0 || $balance <= 0) return; // Order is filled or buyer has no money.
 
-                $pricesMatch = $orderPrice === $productPrice ||
-                    ($productPrice === -1 && $orderPrice === $this->getBestBuyOrderPrice($orderItem, $productUUID)) ||
-                    ($orderPrice === -1 && $productPrice === $this->getBestSellOfferPrice($orderItem, $orderUUID));
+                    if (!$orderItem->equals($productItem, false, false) || $productType !== self::SELL_OFFER) continue;
 
-                if ($pricesMatch) {
-                    $amount = $productAmount >= $orderAmount ? $orderAmount : $productAmount;
-                    $cost = $productPrice;
-                    $cost = $orderPrice !== -1 && $productPrice === -1 ? $orderPrice : $cost;
-                    $cost = $orderPrice === -1 && $productPrice === -1 ? $this->getBasicPrice($productItem) : $cost;
+                    $pricesMatch = $orderPrice === $productPrice ||
+                        ($productPrice === -1 && $orderPrice === $this->getBestBuyOrderPrice($orderItem, $productUUID)) ||
+                        ($orderPrice === -1 && $productPrice === $this->getBestSellOfferPrice($orderItem, $orderUUID));
 
-                    $totalCost = $cost;
-                    $buyableAmount = $amount;
-                    if ($balance < $cost) {
-                        continue;
-                    } elseif ($balance / $cost < $amount) {
-                        $buyableAmount = (int)($balance / $cost);
-                        $totalCost = $buyableAmount * $cost;
-                    }else{
-                        $totalCost = $amount * $cost;
+                    if ($pricesMatch) {
+                        $amount = min($productAmount, $orderAmount);
+                        $cost = $productPrice === -1 ? ($orderPrice === -1 ? $this->getBasicPrice($productItem) : $orderPrice) : $productPrice;
+
+                        $balance = $this->checkOfferWithBalance($cost, $amount, $product, $order, $balance);
                     }
-
-                    $this->addMoney($product, $totalCost);
-                    $this->deductMoney($order, $totalCost);
-
-                    $balance -= $totalCost; // Update balance for next potential transaction in this loop
-
-                    $OAmount = $productAmount >= $buyableAmount ? $orderAmount - $buyableAmount : $buyableAmount - $productAmount;
-                    $PAmount = $productAmount >= $buyableAmount ? $productAmount - $buyableAmount : 0;
-
-                    $order->setCurrentAmount($OAmount);
-                    $product->setCurrentAmount($PAmount);
-
-                    if ($PAmount === 0) $this->removeListing($product->getId());
                 }
             }
-        }
+        });
     }
 
-    public function updateSellOffers(BazaarObject $order): void {
-        self::checkBalance($order, fn(int $balance) => $this->processOrderWithBalance($order, $balance));
+    public function checkOfferWithBalance(int $cost, int $amount, BazaarObject $product, BazaarObject $order, int $balance): int {
+        $totalCost = $cost;
+        $buyableAmount = $amount;
+        $productAmount = $product->getCurrentAmount();
+        $orderAmount = $order->getCurrentAmount();
+        
+        if ($balance < $cost || $cost <= 0) return $balance;
+
+        if ($balance / $cost < $amount) {
+            $buyableAmount = (int)($balance / $cost);
+            $totalCost = $buyableAmount * $cost;
+        }else{
+            $totalCost = $amount * $cost;
+        }
+
+        $this->addMoney($product, $totalCost);
+        $this->deductMoney($order, $totalCost);
+
+        $balance -= $totalCost; // Update balance for next potential transaction in this loop
+
+        $OAmount = $orderAmount - $buyableAmount;
+        $PAmount = $productAmount - $buyableAmount;
+
+        $order->setCurrentAmount($OAmount);
+        $product->setCurrentAmount($PAmount);
+
+        if ($PAmount === 0) $this->removeListing($product->getId());
+
+        return $balance;
     }
 
     public function updateBazaar(): void {
@@ -377,18 +385,17 @@ class BazaarAPI {
                     onSuccess: static function (): void {
                         echo 'Balance updated successfully.';
                     },
-                    onError: static function (SQLException $exception): void {
-                        // if ($exception instanceof RecordNotFoundException) {
-                        //     echo 'Account not found';
-                        //     return;
-                        // }
-
-                        // if ($exception instanceof InsufficientFundsException) {
-                        //     echo 'Insufficient funds';
-                        //     return;
-                        // }
-
-                        // echo 'An error occurred while updating the balance.';
+                    onError: static function (\cooldogedev\BedrockEconomy\api\util\ClosureContext $context): void {
+                        $player = $context->getPlayer();
+                        $error = $context->getErrorMessage();
+                        if ($player !== null) {
+                            $player->sendMessage("An error occurred while deducting money: " . $error);
+                        }
+                        Bazaar::getInstance()->getLogger()->error(
+                            "Failed to deduct money from " . $context->getUsername() .
+                            " (XUID: " . $context->getXuid() . "): " .
+                            $error
+                        );
                     }
                 );
                 break;
@@ -411,15 +418,17 @@ class BazaarAPI {
                     onSuccess: static function (): void {
                         // echo 'Balance updated successfully.';
                     },
-                    onError: static function (SQLException $exception): void {
-                        // if ($exception instanceof RecordNotFoundException) {
-                            //     // echo 'Account not found';
-                            //     return;
-                            // }
-                            
-                            // echo 'An error occurred while updating the balance.';
+                    onError: static function (\cooldogedev\BedrockEconomy\api\util\ClosureContext $context): void {
+                        $player = $context->getPlayer();
+                        $error = $context->getErrorMessage();
+                        if ($player !== null) {
+                            $player->sendMessage("An error occurred while adding money: " . $error);
                         }
-                    );
+                        Bazaar::getInstance()->getLogger()->error(
+                            "Failed to add money to " . $context->getUsername() .
+                            " (XUID: " . $context->getXuid() . "): " . $error
+                        );
+                    });
                     break;
             case "EconomyAPI":
                 EconomyAPI::getInstance()->addMoney($object->getPlayerName(), $amount);
