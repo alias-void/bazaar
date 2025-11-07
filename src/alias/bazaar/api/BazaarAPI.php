@@ -368,7 +368,7 @@ class BazaarAPI {
         $config = Bazaar::getInstance()->getConfig();
         
         switch($config->get("economy")) {
-            case "Bedrock-Economy":
+            case "BedrockEconomy":
                 BedrockEconomyAPI::CLOSURE()->subtract(
                     xuid: "{$object->getPlayerXuid()}",
                     username: "{$object->getPlayerName()}",
@@ -402,7 +402,7 @@ class BazaarAPI {
         $config = Bazaar::getInstance()->getConfig();
         
         switch($config->get("economy")) {
-            case "Bedrock-Economy":
+            case "BedrockEconomy":
                 BedrockEconomyAPI::CLOSURE()->add(
                     xuid: "{$object->getPlayerXuid()}",
                     username: "{$object->getPlayerName()}",
@@ -431,7 +431,7 @@ class BazaarAPI {
         $config = Bazaar::getInstance()->getConfig();
                 
         switch($config->get("economy")) {
-            case "Bedrock-Economy":
+            case "BedrockEconomy":
                 BedrockEconomyAPI::CLOSURE()->get(
                     xuid: $object->getPlayerXuid(),
                     username: $object->getPlayerName(),

@@ -11,8 +11,8 @@ use alias\bazaar\Bazaar;
 use alias\bazaar\gui\MainMenu;
 use alias\bazaar\api\BazaarAPI;
 use pocketmine\scheduler\ClosureTask;
-use muqsit\invmenu\transaction\InvMenuTransaction;
-use muqsit\invmenu\transaction\InvMenuTransactionResult;
+use alias\bazaar\libs\muqsit\invmenu\transaction\InvMenuTransaction;
+use alias\bazaar\libs\muqsit\invmenu\transaction\InvMenuTransactionResult;
 use pocketmine\form\Form;
 
 class ProductView

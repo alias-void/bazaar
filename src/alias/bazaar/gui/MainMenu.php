@@ -10,9 +10,9 @@ use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 use alias\bazaar\gui\pages\ProductView;
 use alias\bazaar\gui\pages\PlayerListings;
-use muqsit\invmenu\InvMenu;
-use muqsit\invmenu\transaction\InvMenuTransaction;
-use muqsit\invmenu\transaction\InvMenuTransactionResult;
+use alias\bazaar\libs\muqsit\invmenu\InvMenu;
+use alias\bazaar\libs\muqsit\invmenu\transaction\InvMenuTransaction;
+use alias\bazaar\libs\muqsit\invmenu\transaction\InvMenuTransactionResult;
 
 class MainMenu
 {
@@ -37,7 +37,7 @@ class MainMenu
         $this->categories = $categories;
         $this->currentCategory = (string)array_key_first($this->categories);
 
-        $this->menu = InvMenu::create(InvMenu::TYPE_DOUBLE_CHEST);
+        $this->menu = InvMenu::create(InvMenu::TYPE_DOUBLE_CHEST, null);
         $this->menu->setName("Bazaar");
         $this->menu->setListener(fn(InvMenuTransaction $t) => $this->transactionListener($t));
 

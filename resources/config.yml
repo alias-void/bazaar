@@ -1,8 +1,8 @@
 config-version: 1
 
 # Specify the economy plugin to use.
-# Supported plugins: "Bedrock-Economy", "EconomyAPI"
-economy: "Bedrock-Economy"
+# Supported plugins: "BedrockEconomy", "EconomyAPI"
+economy: "BedrockEconomy"
 
 # Categories for the main bazaar menu.
 # Use lowercase vanilla item/block names with spaces replaced by underscores.

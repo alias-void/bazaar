@@ -13,7 +13,7 @@ use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
-use muqsit\invmenu\InvMenuHandler;
+use alias\bazaar\libs\muqsit\invmenu\InvMenuHandler;
 
 class Bazaar extends PluginBase {
 
@@ -29,14 +29,24 @@ class Bazaar extends PluginBase {
     public function onEnable(): void {
         self::$instance = $this;
 
+        $this->initConfig();
+
+        $economyPluginName = $this->getConfig()->get("economy", "BedrockEconomy");
+        $economyPlugin = $this->getServer()->getPluginManager()->getPlugin($economyPluginName);
+
+        if ($economyPlugin === null || !$economyPlugin->isEnabled()) {
+            $this->getLogger()->warning("Economy plugin '{$economyPluginName}' not found or is not enabled. Disabling Bazaar.");
+            $this->getServer()->getPluginManager()->disablePlugin($this);
+            return;
+        }
+        $this->getLogger()->info("Successfully hooked into '{$economyPluginName}' for economy features.");
+
         if(!InvMenuHandler::isRegistered()){
 		    InvMenuHandler::register($this);
 	    }
 
         $this->bazaarAPI = new BazaarAPI();
         $this->bazaarAPI->loadBazaar();
-
-        $this->initConfig();
         $this->loadCategories();
     }
 
@@ -60,7 +70,7 @@ class Bazaar extends PluginBase {
         @mkdir($this->getDataFolder());
         $this->saveDefaultConfig();
 
-        if ($this->getConfig()->get("config-version") === 1) return;
+        if ($this->getConfig()->get("config-version") === 2) return;
 
         $this->getLogger()->notice("Updating bazaar config file");
         rename($this->getDataFolder() . "config.yml", $this->getDataFolder() . "config.yml.old");
