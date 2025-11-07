@@ -12,6 +12,7 @@ use pocketmine\utils\Config;
 use alias\bazaar\libs\SOFe\AwaitGenerator\Await;
 use pocketmine\scheduler\ClosureTask;
 use cooldogedev\BedrockEconomy\api\BedrockEconomyAPI;
+use onebone\economyapi\EconomyAPI;
 
 class BazaarAPI {
 
@@ -391,6 +392,9 @@ class BazaarAPI {
                     }
                 );
                 break;
+            case "EconomyAPI":
+                EconomyAPI::getInstance()->reduceMoney($object->getPlayerName(), $amount);
+                break;
         }
     }
 
@@ -409,28 +413,41 @@ class BazaarAPI {
                     },
                     onError: static function (SQLException $exception): void {
                         // if ($exception instanceof RecordNotFoundException) {
-                        //     // echo 'Account not found';
-                        //     return;
-                        // }
-
-                        // echo 'An error occurred while updating the balance.';
+                            //     // echo 'Account not found';
+                            //     return;
+                            // }
+                            
+                            // echo 'An error occurred while updating the balance.';
+                        }
+                    );
+                    break;
+            case "EconomyAPI":
+                EconomyAPI::getInstance()->addMoney($object->getPlayerName(), $amount);
+                break;
+                }
+            }
+            
+    public static function checkBalance(BazaarObject $object, callable $callback): void {
+        $config = Bazaar::getInstance()->getConfig();
+                
+        switch($config->get("economy")) {
+            case "Bedrock-Economy":
+                BedrockEconomyAPI::CLOSURE()->get(
+                    xuid: $object->getPlayerXuid(),
+                    username: $object->getPlayerName(),
+                    onSuccess: function(array $result) use ($callback): void {
+                        $callback((int)$result["amount"]);
+                    },
+                    onError: function() use ($callback): void {
+                        $callback(0);
                     }
                 );
                 break;
+            case "EconomyAPI":
+                $balance = EconomyAPI::getInstance()->myMoney($object->getPlayerName());
+                $callback($balance !== false ? (int)$balance : 0);
+                break;
         }
-    }
-
-    public static function checkBalance(BazaarObject $object, callable $callback): void {
-        BedrockEconomyAPI::CLOSURE()->get(
-            xuid: $object->getPlayerXuid(),
-            username: $object->getPlayerName(),
-            onSuccess: function(array $result) use ($callback): void {
-                $callback((int)$result["amount"]);
-            },
-            onError: function() use ($callback): void {
-                $callback(0);
-            }
-        );
     }
 
 }

@@ -1,5 +1,7 @@
 config-version: 1
 
+# Specify the economy plugin to use.
+# Supported plugins: "Bedrock-Economy", "EconomyAPI"
 economy: "Bedrock-Economy"
 
 # Categories for the main bazaar menu.
