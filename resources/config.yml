@@ -1,4 +1,4 @@
-config-version: 1
+config-version: 2
 
 # Specify the economy plugin to use.
 # Supported plugins: "BedrockEconomy", "EconomyAPI"

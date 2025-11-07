@@ -383,7 +383,8 @@ class BazaarAPI {
                     amount: $amount,
                     decimals: 00,
                     onSuccess: static function (): void {
-                        echo 'Balance updated successfully.';
+                        Bazaar::getInstance()->getLogger()->info("Balance updated successfully.");
+                        // echo 'Balance updated successfully.';
                     },
                     onError: static function (\cooldogedev\BedrockEconomy\api\util\ClosureContext $context): void {
                         $player = $context->getPlayer();
@@ -416,7 +417,7 @@ class BazaarAPI {
                     amount: $amount,
                     decimals: 00,
                     onSuccess: static function (): void {
-                        // echo 'Balance updated successfully.';
+                        Bazaar::getInstance()->getLogger()->info("Balance updated successfully.");
                     },
                     onError: static function (\cooldogedev\BedrockEconomy\api\util\ClosureContext $context): void {
                         $player = $context->getPlayer();

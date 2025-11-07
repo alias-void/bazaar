@@ -461,7 +461,7 @@ class Await extends PromiseState{
 
 		if($current instanceof Generator){
 			if(!self::$warnedDeprecatedDirectYield) {
-				echo "\n" . 'NOTICE: `yield $generator` has been deprecated, please use `yield from $generator` instead.' . "\n";
+				// echo "\n" . 'NOTICE: `yield $generator` has been deprecated, please use `yield from $generator` instead.' . "\n";
 				self::$warnedDeprecatedDirectYield = true;
 			}
 

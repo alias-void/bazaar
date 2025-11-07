@@ -30,6 +30,7 @@ class Bazaar extends PluginBase {
         self::$instance = $this;
 
         $this->initConfig();
+        $this->bazaarAPI = new BazaarAPI();
 
         $economyPluginName = $this->getConfig()->get("economy", "BedrockEconomy");
         $economyPlugin = $this->getServer()->getPluginManager()->getPlugin($economyPluginName);
@@ -45,7 +46,6 @@ class Bazaar extends PluginBase {
 		    InvMenuHandler::register($this);
 	    }
 
-        $this->bazaarAPI = new BazaarAPI();
         $this->bazaarAPI->loadBazaar();
         $this->loadCategories();
     }
